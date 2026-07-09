@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codecrusher — Portfolio in Arbeit</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg: #050506;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.09);
+    --accent: #7c9fff;
+    --accent-soft: rgba(124,159,255,0.35);
+  }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: #f2f2f4;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  /* Ambient blurred background blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .blob-1 {
+    width: 42vw; height: 42vw;
+    top: -10%; left: -10%;
+    background: radial-gradient(circle, rgba(124,159,255,0.35), transparent 70%);
+    animation: float1 22s ease-in-out infinite;
+  }
+  .blob-2 {
+    width: 38vw; height: 38vw;
+    bottom: -12%; right: -8%;
+    background: radial-gradient(circle, rgba(180,120,255,0.28), transparent 70%);
+    animation: float2 26s ease-in-out infinite;
+  }
+  .blob-3 {
+    width: 26vw; height: 26vw;
+    top: 40%; left: 55%;
+    background: radial-gradient(circle, rgba(80,220,200,0.18), transparent 70%);
+    animation: float1 30s ease-in-out infinite reverse;
+  }
+
+  @keyframes float1 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(4%, 6%) scale(1.08); }
+  }
+  @keyframes float2 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-5%, -4%) scale(1.06); }
+  }
+
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+  }
+
+  .glass-nav {
+    background: rgba(10,10,12,0.45);
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .accent-text {
+    background: linear-gradient(120deg, #a7bfff, #d9b8ff 60%, #7c9fff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .btn-primary {
+    background: linear-gradient(120deg, var(--accent), #b28dff);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -8px var(--accent-soft);
+  }
+
+  .icon-link {
+    transition: transform .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .icon-link:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  .pulse-dot {
+    box-shadow: 0 0 0 0 rgba(124,255,170,0.6);
+    animation: pulse 2.2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(124,255,170,0.55); }
+    70% { box-shadow: 0 0 0 10px rgba(124,255,170,0); }
+    100% { box-shadow: 0 0 0 0 rgba(124,255,170,0); }
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp .8s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  ::selection { background: var(--accent-soft); color: #fff; }
+
+  /* ---- Interactive / hover effects ---- */
+
+  #spotlight {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%),
+      rgba(124,159,255,0.10), transparent 45%);
+    transition: opacity .3s ease;
+  }
+
+  .tilt {
+    transform-style: preserve-3d;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+    will-change: transform;
+  }
+  .tilt:hover {
+    box-shadow: 0 20px 60px -20px rgba(124,159,255,0.25), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+
+  .sheen { position: relative; overflow: hidden; }
+  .sheen::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.10), transparent);
+    transform: skewX(-20deg);
+    transition: left .8s ease;
+    pointer-events: none;
+  }
+  .sheen:hover::before { left: 130%; }
+
+  .step-card {
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease, background .3s ease;
+  }
+  .step-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: rgba(124,159,255,0.4);
+    box-shadow: 0 14px 34px -14px rgba(124,159,255,0.35);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .icon-link:hover { box-shadow: 0 0 0 1px rgba(124,159,255,0.4), 0 8px 22px -8px rgba(124,159,255,0.5); }
+  .icon-link:hover svg { transform: scale(1.1) rotate(-6deg); }
+  .icon-link svg { transition: transform .25s ease; }
+
+  .chip { transition: transform .25s ease, background .25s ease, border-color .25s ease; }
+  .chip:hover { transform: translateY(-2px); background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+
+  .magnetic { transition: transform .18s ease, box-shadow .25s ease; }
+
+  .ripple-wrap { position: relative; overflow: hidden; }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: scale(0);
+    animation: rippleAnim .6s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes rippleAnim { to { transform: scale(3); opacity: 0; } }
+
+  .glass-nav:hover { border-color: rgba(255,255,255,0.14); }
+
+  /* ---- New: typewriter cursor ---- */
+  .blink-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 1em;
+    background: #6ee7b7;
+    margin-left: 2px;
+    vertical-align: -2px;
+    animation: blink 1s step-start infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---- New: terminal ---- */
+  .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+  #term-output::-webkit-scrollbar { width: 6px; }
+  #term-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+  /* ---- New: tech marquee ---- */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    gap: 2.25rem;
+    animation: marquee 24s linear infinite;
+  }
+  .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---- New: skeleton loader for live GitHub stats ---- */
+  .skel {
+    background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.16), rgba(255,255,255,.06));
+    background-size: 200% 100%;
+    animation: skel 1.3s ease-in-out infinite;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  @keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  html { scroll-behavior: smooth; }
+  section[id] { scroll-margin-top: 6.5rem; }
+
+  .nav-link { transition: color .2s ease, background .2s ease; color: rgba(255,255,255,0.55); }
+  .nav-link:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+  .nav-link.active { color: #6ee7b7; background: rgba(110,231,183,0.1); }
+
+  /* ---- New: toast banner ---- */
+  #toast {
+    position: fixed;
+    top: 1.1rem;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    z-index: 60;
+    opacity: 0;
+    transition: transform .4s cubic-bezier(.2,.8,.2,1), opacity .35s ease;
+    pointer-events: none;
+    max-width: calc(100vw - 2rem);
+  }
+  #toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .blob, .fade-up, .pulse-dot, .tilt, .sheen::before, .step-card, .icon-link, .chip, .magnetic,
+    .blink-cursor, .marquee-track, .skel, #toast, .nav-link { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="relative min-h-dvh flex flex-col">
+
+  <div id="spotlight"></div>
+
+  <div id="toast" class="glass font-mono text-xs sm:text-sm rounded-xl px-4 py-3 flex items-center gap-2.5 shadow-2xl shadow-black/50" role="status" aria-live="polite">
+    <span id="toast-icon" class="shrink-0"></span>
+    <span id="toast-text"></span>
+  </div>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Nav -->
+  <header>
+    <nav class="glass-nav fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-2rem)] max-w-3xl rounded-2xl px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
+      <a href="#home" class="flex items-center gap-1 font-mono text-sm sm:text-base font-semibold tracking-tight shrink-0">
+        <span class="text-white/30">~/</span>codecrusher<span class="blink-cursor hidden sm:inline-block"></span>
+      </a>
+
+      <div class="flex items-center gap-0.5 sm:gap-1 font-mono text-[11px] sm:text-xs overflow-x-auto">
+        <a href="#home" data-nav="home" class="nav-link whitespace-nowrap px-2.5 py-1.5 rounded-lg text-white/55">home</a>
+        <a href="#about" data-nav="about" class="nav-link whitespace-nowrap px-2.5 py-1.5 rounded-lg text-white/55">about</a>
+        <a href="#stack" data-nav="stack" class="nav-link whitespace-nowrap px-2.5 py-1.5 rounded-lg text-white/55">stack</a>
+        <!-- <a href="#terminal" data-nav="terminal" class="nav-link whitespace-nowrap px-2.5 py-1.5 rounded-lg text-white/55">term</a> -->
+      </div>
+
+      <div class="flex items-center gap-2 text-[11px] sm:text-xs text-white/70 shrink-0">
+        <span class="relative flex h-2 w-2">
+          <span class="pulse-dot absolute inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+        </span>
+        <span class="hidden sm:inline">Portfolio in Arbeit</span>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-5 pt-28 sm:pt-32 pb-16">
+    <section id="home" class="glass tilt sheen fade-up w-full max-w-xl rounded-3xl p-8 sm:p-12 text-center shadow-2xl shadow-black/40">
+
+      <p class="fade-up font-mono text-xs sm:text-sm text-emerald-300/80 mb-5 h-5" style="animation-delay:.05s">
+        <span class="text-white/30">//</span> <span id="typewriter"></span><span class="blink-cursor"></span>
+      </p>
+
+      <h1 class="fade-up text-3xl sm:text-5xl font-bold tracking-tight leading-tight mb-4" style="animation-delay:.1s">
+        Hey, ich bin <span class="accent-text">Codecrusher</span>
+      </h1>
+
+      <p class="fade-up text-white/65 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-8" style="animation-delay:.18s">
+        18 Jahre, seit 7 Jahren im Code zuhause — von Python über C++ bis zum
+        heutigen Web-Stack mit <span class="text-white/85">JS/TS</span>. Mein
+        richtiges Portfolio ist im Bau, bis dahin gibt's hier den Kurzüberblick.
+      </p>
+
+      <div class="fade-up flex flex-wrap items-center justify-center gap-3 mb-6" style="animation-delay:.26s">
+        <a href="mailto:hallo@example.com"
+           class="btn-primary magnetic ripple-wrap text-sm font-medium text-white rounded-xl px-5 py-2.5">
+          Kontakt aufnehmen
+        </a>
+      </div>
+
+      <div class="fade-up flex items-center justify-center gap-3 mb-8" style="animation-delay:.34s">
+        <a href="https://github.com/Phoenix1485" target="_blank" rel="noopener"
+           class="icon-link glass w-10 h-10 rounded-full flex items-center justify-center" aria-label="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.57.1.78-.25.78-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.8 1.19 1.83 1.19 3.09 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.08.78 2.18v3.23c0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+      </a>
+        <a href="mailto:contact@codecrusher.de"
+           class="icon-link glass w-10 h-10 rounded-full flex items-center justify-center" aria-label="E-Mail">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13Zm2.2.5 7.8 6.2L19.8 6H4.2ZM20 7.9l-7.38 5.87a1 1 0 0 1-1.24 0L4 7.9v10.6c0 .28.22.5.5.5h15a.5.5 0 0 0 .5-.5V7.9Z"/></svg>
+        </a>
+        <button type="button" id="discord-copy"
+           class="icon-link glass ripple-wrap w-10 h-10 rounded-full flex items-center justify-center" aria-label="Discord-Namen kopieren">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.45.87-.61 1.26a18.3 18.3 0 0 0-5.48 0 12.6 12.6 0 0 0-.62-1.26.08.08 0 0 0-.08-.04c-1.7.29-3.34.8-4.89 1.52a.07.07 0 0 0-.03.03C.53 8.6-.32 12.68.1 16.72a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 6 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-2a.08.08 0 0 0-.04-.11c-.65-.25-1.28-.55-1.87-.9a.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.25.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.11c.37.7.78 1.36 1.23 2a.08.08 0 0 0 .08.03 19.83 19.83 0 0 0 6-3.03.08.08 0 0 0 .03-.06c.5-4.68-.83-8.72-3.5-12.32a.06.06 0 0 0-.03-.03ZM8.02 14.24c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.94 2.42-2.15 2.42Zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.93 2.42-2.15 2.42Z"/></svg>
+        </button>
+      </div>
+
+      <!-- Live GitHub stats -->
+      <div class="fade-up glass rounded-2xl px-5 py-3 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm" style="animation-delay:.4s">
+        <span class="text-white/35 truncate">GET /users/Phoenix1485</span>
+        <div class="flex items-center gap-5 shrink-0">
+          <div class="flex flex-col items-center gap-1">
+            <span id="gh-repos" class="skel w-7 h-4"></span>
+            <span class="text-[10px] text-white/40 tracking-wide">repos</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <span id="gh-followers" class="skel w-7 h-4"></span>
+            <span class="text-[10px] text-white/40 tracking-wide">follower</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Me -->
+    <section id="about" class="glass tilt sheen fade-up w-full max-w-xl rounded-3xl p-8 sm:p-12 mt-6 shadow-2xl shadow-black/40" style="animation-delay:.46s">
+
+      <p class="text-xs sm:text-sm uppercase tracking-[0.25em] text-white/50 mb-5">
+        Über mich
+      </p>
+
+      <p class="text-white/75 text-sm sm:text-base leading-relaxed mb-8">
+        Bürgerlich <span class="text-white font-medium">Len K.</span> — 18 Jahre alt, zuhause in
+        <span class="text-white font-medium">Hessen, Deutschland</span>. Ich programmiere seit
+        rund <span class="text-white font-medium">7 Jahren</span> und habe in der Zeit vom Skripten
+        bis zur Web-Entwicklung so ziemlich alles durchlaufen — aktuell dreht sich das meiste um
+        <span class="accent-text font-medium">JS/TS</span>, dazu Erfahrung mit Datenbanken und einer
+        bunten Mischung an eigenen Projekten und Ideen.
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-9">
+        <span class="glass chip rounded-full px-4 py-1.5 text-xs sm:text-sm text-white/80">🇩🇪 Hessen, Deutschland</span>
+        <span class="glass chip rounded-full px-4 py-1.5 text-xs sm:text-sm text-white/80">18 Jahre alt</span>
+        <span class="glass chip rounded-full px-4 py-1.5 text-xs sm:text-sm text-white/80">~7 Jahre Coding-Erfahrung</span>
+      </div>
+
+      <p class="text-xs uppercase tracking-[0.2em] text-white/40 mb-4 text-left">Mein Weg</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+        <div class="glass step-card rounded-2xl p-4">
+          <span class="text-[11px] text-white/40">01 · Start</span>
+          <p class="mt-1.5 font-semibold text-sm sm:text-base">Python</p>
+          <p class="mt-1 text-[11px] sm:text-xs text-white/55 leading-snug">Erste Schritte im Programmieren</p>
+        </div>
+        <div class="glass step-card rounded-2xl p-4">
+          <span class="text-[11px] text-white/40">02 · Vertiefung</span>
+          <p class="mt-1.5 font-semibold text-sm sm:text-base">C / C++</p>
+          <p class="mt-1 text-[11px] sm:text-xs text-white/55 leading-snug">App- & Game-Entwicklung</p>
+        </div>
+        <div class="glass step-card rounded-2xl p-4 ring-1 ring-white/15">
+          <span class="text-[11px] accent-text font-medium">03 · Heute</span>
+          <p class="mt-1.5 font-semibold text-sm sm:text-base">JS / TS</p>
+          <p class="mt-1 text-[11px] sm:text-xs text-white/55 leading-snug">Web-Entwicklung & Datenbanken</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech stack marquee -->
+    <section id="stack" class="glass tilt sheen fade-up w-full max-w-xl rounded-3xl p-8 sm:p-10 mt-6 shadow-2xl shadow-black/40" style="animation-delay:.52s">
+      <p class="text-xs sm:text-sm uppercase tracking-[0.25em] text-white/50 mb-6">Stack</p>
+      <div class="marquee-wrap overflow-hidden" style="-webkit-mask-image:linear-gradient(90deg,transparent,black 12%,black 88%,transparent); mask-image:linear-gradient(90deg,transparent,black 12%,black 88%,transparent);">
+        <div class="marquee-track font-mono text-sm sm:text-base text-white/65 whitespace-nowrap">
+          <span class="flex items-center gap-9">
+            <span>Python</span><span class="text-white/15">/</span>
+            <span>C++</span><span class="text-white/15">/</span>
+            <span class="accent-text">JavaScript</span><span class="text-white/15">/</span>
+            <span class="accent-text">TypeScript</span><span class="text-white/15">/</span>
+            <span>Node.js</span><span class="text-white/15">/</span>
+            <span>SQL</span><span class="text-white/15">/</span>
+            <span>Git</span>
+          </span>
+          <span class="flex items-center gap-9" aria-hidden="true">
+            <span>Python</span><span class="text-white/15">/</span>
+            <span>C++</span><span class="text-white/15">/</span>
+            <span class="accent-text">JavaScript</span><span class="text-white/15">/</span>
+            <span class="accent-text">TypeScript</span><span class="text-white/15">/</span>
+            <span>Node.js</span><span class="text-white/15">/</span>
+            <span>SQL</span><span class="text-white/15">/</span>
+            <span>Git</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive terminal -->
+    <section id="terminal" class="glass fade-up w-full max-w-xl rounded-3xl mt-6 shadow-2xl shadow-black/40 overflow-hidden" style="animation-delay:.58s">
+      <div class="flex items-center gap-2 px-5 py-3 border-b border-white/10 bg-white/[0.03]">
+        <span class="term-dot bg-[#ff5f56]"></span>
+        <span class="term-dot bg-[#ffbd2e]"></span>
+        <span class="term-dot bg-[#27c93f]"></span>
+        <span class="ml-3 text-xs text-white/40 font-mono">guest@codecrusher:~</span>
+      </div>
+      <div id="term-output" class="font-mono px-5 py-4 h-56 overflow-y-auto text-sm leading-relaxed text-white/80">
+        <p class="mb-1 text-white/40">Willkommen. Tippe <span class="text-emerald-300">help</span> für Befehle.</p>
+      </div>
+      <form id="term-form" class="flex items-center gap-2 px-5 py-3 border-t border-white/10 font-mono text-sm">
+        <span class="text-emerald-300">➜</span>
+        <input id="term-input" autocomplete="off" spellcheck="false"
+               class="flex-1 bg-transparent outline-none text-white/90 placeholder-white/25"
+               placeholder="help" />
+      </form>
+    </section>
+  </main>
+
+  <footer class="relative z-10 text-center pb-6 text-xs text-white/35">
+    © <span id="year"></span> Codecrusher — vollständiges Portfolio in Entwicklung
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Nav scroll-spy ---- */
+    (function(){
+      const links = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('main section[id]');
+      const linkByTarget = {};
+      links.forEach(l => { linkByTarget[l.dataset.nav] = l; });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          links.forEach(l => l.classList.remove('active'));
+          const link = linkByTarget[entry.target.id];
+          if (link) link.classList.add('active');
+        });
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+
+      sections.forEach(s => observer.observe(s));
+    })();
+
+    /* ---- Toast banner ---- */
+    const showToast = (() => {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const text = document.getElementById('toast-text');
+      const iconSuccess = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      const iconError = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fda4af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+      let hideTimer;
+      return function showToast(message, type = 'success'){
+        icon.innerHTML = type === 'success' ? iconSuccess : iconError;
+        text.textContent = message;
+        toast.style.borderColor = type === 'success' ? 'rgba(110,231,183,0.35)' : 'rgba(253,164,175,0.35)';
+        toast.classList.add('show');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+      };
+    })();
+
+    /* ---- Discord-Namen kopieren ---- */
+    (function(){
+      const btn = document.getElementById('discord-copy');
+      const discordUsername = 'codecrusher'; // ← hier deinen echten Discord-Namen eintragen
+      btn.addEventListener('click', async () => {
+        try {
+          if (!navigator.clipboard) throw new Error('Clipboard API nicht verfügbar');
+          await navigator.clipboard.writeText(discordUsername);
+          showToast('Erfolgreich Discord-Namen in die Zwischenablage gespeichert', 'success');
+        } catch (err) {
+          console.error('Clipboard-Fehler:', err);
+          showToast('Kopieren fehlgeschlagen — bitte manuell kopieren', 'error');
+        }
+      });
+    })();
+
+    /* ---- Typewriter eyebrow ---- */
+    (function(){
+      const el = document.getElementById('typewriter');
+      const words = ['Übergangsseite', 'Full-Stack Developer', '7 Jahre Code-Erfahrung', 'JS/TS & Datenbanken'];
+      if (reduceMotion) { el.textContent = words[0]; return; }
+      let wi = 0, ci = 0, deleting = false;
+      function tick(){
+        const word = words[wi];
+        if (!deleting) {
+          ci++;
+          el.textContent = word.slice(0, ci);
+          if (ci === word.length) { deleting = true; setTimeout(tick, 1400); return; }
+        } else {
+          ci--;
+          el.textContent = word.slice(0, ci);
+          if (ci === 0) { deleting = false; wi = (wi + 1) % words.length; }
+        }
+        setTimeout(tick, deleting ? 35 : 60);
+      }
+      tick();
+    })();
+
+    /* ---- Live GitHub stats ---- */
+    (function(){
+      const repoEl = document.getElementById('gh-repos');
+      const folEl = document.getElementById('gh-followers');
+      fetch('https://api.github.com/users/Phoenix1485')
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => {
+          repoEl.textContent = d.public_repos ?? '—';
+          folEl.textContent = d.followers ?? '—';
+          [repoEl, folEl].forEach(el => el.classList.remove('skel', 'w-7', 'h-4'));
+        })
+        .catch(() => {
+          repoEl.textContent = '—';
+          folEl.textContent = '—';
+          [repoEl, folEl].forEach(el => el.classList.remove('skel', 'w-7', 'h-4'));
+        });
+    })();
+
+    /* ---- Interactive terminal ---- */
+    (function(){
+      const form = document.getElementById('term-form');
+      const input = document.getElementById('term-input');
+      const output = document.getElementById('term-output');
+      const history = [];
+      let hIdx = -1;
+
+      const commands = {
+        help: () => `Verfügbare Befehle: <span class="text-emerald-300">whoami</span>, <span class="text-emerald-300">skills</span>, <span class="text-emerald-300">stack</span>, <span class="text-emerald-300">contact</span>, <span class="text-emerald-300">clear</span>`,
+        whoami: () => `Len K. — 18, Hessen/DE — Software-Entwickler seit 7 Jahren.`,
+        skills: () => `Python · C/C++ · JavaScript · TypeScript · SQL — Fokus aktuell auf Web-Entwicklung.`,
+        stack: () => `Frontend: HTML/CSS/JS-TS · Backend: Node · Datenbanken: SQL`,
+        contact: () => `Erreichbar über die Icons oben oder per Mail: hallo@example.com`,
+        clear: () => { output.innerHTML = ''; return null; },
+      };
+
+      function print(html){
+        const p = document.createElement('p');
+        p.innerHTML = html;
+        p.className = 'mb-1';
+        output.appendChild(p);
+        output.scrollTop = output.scrollHeight;
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const raw = input.value.trim();
+        if (!raw) return;
+        history.push(raw);
+        hIdx = history.length;
+        print(`<span class="text-white/40">➜</span> ${raw}`);
+        const cmd = raw.toLowerCase();
+        if (commands[cmd]) {
+          const res = commands[cmd]();
+          if (res) print(res);
+        } else {
+          print(`<span class="text-rose-300/80">command nicht gefunden:</span> ${raw} — tippe <span class="text-emerald-300">help</span>`);
+        }
+        input.value = '';
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') {
+          if (hIdx > 0) { hIdx--; input.value = history[hIdx]; }
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowDown') {
+          if (hIdx < history.length - 1) { hIdx++; input.value = history[hIdx]; }
+          else { hIdx = history.length; input.value = ''; }
+          e.preventDefault();
+        }
+      });
+    })();
+
+    if (!reduceMotion) {
+      const spotlight = document.getElementById('spotlight');
+      window.addEventListener('pointermove', (e) => {
+        spotlight.style.setProperty('--x', e.clientX + 'px');
+        spotlight.style.setProperty('--y', e.clientY + 'px');
+      });
+
+      document.querySelectorAll('.tilt').forEach((card) => {
+        const strength = 8;
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          card.style.transform = `perspective(900px) rotateX(${(-py * strength).toFixed(2)}deg) rotateY(${(px * strength).toFixed(2)}deg) translateY(-2px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateY(0)';
+        });
+      });
+
+      document.querySelectorAll('.magnetic').forEach((btn) => {
+        const pull = 0.35;
+        btn.addEventListener('mousemove', (e) => {
+          const r = btn.getBoundingClientRect();
+          const x = (e.clientX - r.left - r.width / 2) * pull;
+          const y = (e.clientY - r.top - r.height / 2) * pull;
+          btn.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.transform = 'translate(0, 0)';
+        });
+      });
+
+      document.querySelectorAll('.ripple-wrap').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          const r = el.getBoundingClientRect();
+          const ripple = document.createElement('span');
+          const size = Math.max(r.width, r.height);
+          ripple.className = 'ripple';
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = (e.clientX - r.left - size / 2) + 'px';
+          ripple.style.top = (e.clientY - r.top - size / 2) + 'px';
+          el.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 650);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
